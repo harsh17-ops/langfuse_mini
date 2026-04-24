@@ -1,32 +1,39 @@
 # Interview Prep
 
-## 60-Second Project Summary
+## 60-second pitch
 
-I built a mini Langfuse-style observability platform for LLM applications using FastAPI, Next.js, SQLite, and the Groq API. Every model call is wrapped so I can capture prompt, response, latency, model name, token usage, and user feedback. The backend persists those traces, and the frontend dashboard lets me inspect them and reason about model behavior and quality.
+I reimplemented the Langfuse core architecture rather than cloning the full product. The backend models observability as `trace -> span -> generation`, stores prompt and response metadata, tracks latency, tokens, and cost, and attaches evaluations through a polymorphic scores table. On top of that I added an NLP-focused evaluation layer with semantic similarity, zero-shot classification, and LLM-as-judge scoring, because that is where an NLP / Transformers engineer can add differentiated value.
 
-## Strong Answers
+## Strong answers
 
-### What problem does this solve?
+### Why not a single logging table?
 
-It makes LLM behavior inspectable. Without trace logging, model failures are hard to debug because you do not know what prompt was sent, how long it took, how many tokens it used, or whether the response was useful.
+Because real LLM applications are multi-step systems. A single flat table loses the structure of retrieval, ranking, generation, and evaluation. Hierarchical traces preserve that execution graph.
 
-### Why is token tracking important?
+### Why a unified scores table?
 
-Token usage is a proxy for cost and efficiency. It helps answer whether the app is becoming more expensive over time and whether prompt design is wasteful.
+It lets me query human feedback, model-based metrics, and judge scores through one abstraction. That makes analytics and filtering much simpler.
 
-### Why collect thumbs up/down?
+### Why add prompt versioning?
 
-Because system metrics alone do not tell me if the answer was good. Feedback gives me a quality signal that I can correlate with prompts, models, and latency.
+Prompting is part of the application logic. If you cannot tie generations back to prompt versions, you cannot compare prompt changes scientifically.
 
-### What tradeoff did you make for interview speed?
+### Why is the NLP layer relevant?
 
-I used SQLite and synchronous persistence because they reduce setup complexity. I kept the architecture production-oriented so swapping in PostgreSQL, migrations, caching, and analytics later is straightforward.
+Observability tells me what happened. NLP evaluations help me estimate whether the response was useful, coherent, grounded, or on-topic without waiting for humans on every trace.
 
-## Follow-Up Questions to Practice
+## Questions they may ask
 
-1. How would you trace multi-turn conversations?
-2. How would you compare multiple models on the same prompts?
-3. How would you estimate cost per request?
-4. How would you add RAG observability?
-5. How would you prevent sensitive prompt data from being exposed?
+1. Why did you choose `trace -> span -> generation`?
+2. What tradeoffs did you make compared with real Langfuse?
+3. Why use sentence-transformers here?
+4. Why is LLM-as-judge backgrounded?
+5. How would you support RAG pipelines next?
+6. How would you scale the scores table?
+
+## How to answer the scope question
+
+If they ask why you did not clone the entire repo, say:
+
+I deliberately reimplemented the Langfuse core rather than the full product surface. The real project includes prompt management, experiments, datasets, integrations, and deployment infrastructure. For interview scope, the highest-signal slice is the observability backbone plus one differentiated evaluation layer.
 

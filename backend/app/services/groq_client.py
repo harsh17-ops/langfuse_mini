@@ -1,9 +1,10 @@
 import time
+from typing import Any
 
 import httpx
 
 from app.core.config import get_settings
-from app.services.token_counter import estimate_tokens
+from app.services.token_counter import count_tokens, estimate_cost_usd
 
 
 class GroqClient:
@@ -11,7 +12,7 @@ class GroqClient:
         self.settings = get_settings()
         self.base_url = "https://api.groq.com/openai/v1/chat/completions"
 
-    async def chat(self, prompt: str, model_name: str | None = None) -> dict:
+    async def chat(self, prompt: str, model_name: str | None = None, response_format: dict[str, Any] | None = None) -> dict:
         model = model_name or self.settings.groq_model
         headers = {
             "Authorization": f"Bearer {self.settings.groq_api_key}",
@@ -22,6 +23,8 @@ class GroqClient:
             "messages": [{"role": "user", "content": prompt}],
             "temperature": 0.2,
         }
+        if response_format:
+            payload["response_format"] = response_format
 
         start_time = time.perf_counter()
         async with httpx.AsyncClient(timeout=30.0) as client:
@@ -36,9 +39,10 @@ class GroqClient:
         # If they are missing, we fall back to local estimation so the dashboard
         # still shows usage and cost signals.
         usage = body.get("usage", {})
-        prompt_tokens = usage.get("prompt_tokens", estimate_tokens(prompt))
-        completion_tokens = usage.get("completion_tokens", estimate_tokens(message))
+        prompt_tokens = usage.get("prompt_tokens", count_tokens(prompt))
+        completion_tokens = usage.get("completion_tokens", count_tokens(message))
         total_tokens = usage.get("total_tokens", prompt_tokens + completion_tokens)
+        cost_usd = estimate_cost_usd(model, total_tokens)
 
         return {
             "response": message,
@@ -47,5 +51,5 @@ class GroqClient:
             "prompt_tokens": prompt_tokens,
             "completion_tokens": completion_tokens,
             "total_tokens": total_tokens,
+            "cost_usd": cost_usd,
         }
-

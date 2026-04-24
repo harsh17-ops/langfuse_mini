@@ -6,17 +6,17 @@ import { useRouter } from "next/navigation";
 import { submitFeedback } from "@/app/lib/api";
 
 type Props = {
-  logId: number;
+  traceId: number;
   currentFeedback: "up" | "down" | null;
 };
 
-export function FeedbackButtons({ logId, currentFeedback }: Props) {
+export function FeedbackButtons({ traceId, currentFeedback }: Props) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
   function handleClick(feedback: "up" | "down") {
     startTransition(async () => {
-      await submitFeedback(logId, feedback);
+      await submitFeedback(traceId, feedback);
       router.refresh();
     });
   }
@@ -42,4 +42,3 @@ export function FeedbackButtons({ logId, currentFeedback }: Props) {
     </div>
   );
 }
-

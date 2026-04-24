@@ -6,11 +6,12 @@ type Props = {
 
 export function StatsCards({ stats }: Props) {
   const cards = [
-    { label: "Total Requests", value: stats.total_requests.toString() },
+    { label: "Total Traces", value: stats.total_traces.toString() },
     { label: "Avg Latency", value: `${stats.avg_latency_ms} ms` },
+    { label: "P95 Latency", value: `${stats.p95_latency_ms} ms` },
     { label: "Total Tokens", value: stats.total_tokens.toString() },
-    { label: "Positive Feedback", value: stats.positive_feedback.toString() },
-    { label: "Negative Feedback", value: stats.negative_feedback.toString() }
+    { label: "Total Cost", value: `$${stats.total_cost_usd.toFixed(4)}` },
+    { label: "Avg Judge Score", value: stats.avg_overall_score.toFixed(3) }
   ];
 
   return (
@@ -24,4 +25,3 @@ export function StatsCards({ stats }: Props) {
     </section>
   );
 }
-

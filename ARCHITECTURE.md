@@ -1,50 +1,77 @@
 # Architecture Walkthrough
 
-## System Summary
+## Core idea
 
-This project behaves like a tiny LLM tracing system:
+This project reimplements the Langfuse observability spine:
 
-- an application sends a prompt
-- the backend forwards it to Groq
-- the backend measures performance and usage
-- the trace is stored in a database
-- the frontend renders the trace history
-- users attach quality feedback
+- capture one user request as a `Trace`
+- break internal work into `Span` records
+- persist each LLM call as a `Generation`
+- attach evaluations as `Score` rows
+- version prompts through `PromptTemplate`
 
-## Core Components
+## Why `Trace -> Span -> Generation` matters
 
-### 1. API Layer
+A flat logging table cannot represent multi-step AI systems well. In real LLM systems, one user request often triggers:
 
-FastAPI receives requests, validates payloads, and exposes trace endpoints.
+- retrieval
+- ranking
+- multiple model calls
+- tool usage
+- evaluation
 
-### 2. Provider Layer
+Hierarchical tracing is the right abstraction because it preserves structure.
 
-`GroqClient` is responsible for calling the model provider and extracting response metadata.
+## Score model design
 
-### 3. Observability Layer
+The `scores` table is polymorphic:
 
-`ObservabilityService` translates model activity into persistent traces.
+- `NUMERIC`
+- `BOOLEAN`
+- `CATEGORICAL`
 
-### 4. Persistence Layer
+That lets one table store:
 
-SQLAlchemy stores each trace as an `LLMLog`.
+- human feedback
+- semantic similarity
+- zero-shot classifier outputs
+- LLM-as-judge metrics
 
-### 5. Presentation Layer
+This is one of the most important system design choices in the project.
 
-Next.js fetches traces and metrics and renders them in a dashboard.
+## Observability lifecycle
 
-## Why This Design Is Interview-Friendly
+1. Request arrives
+2. Trace is created
+3. Generation span is created
+4. Groq call is executed
+5. Latency is measured
+6. Tokens are counted
+7. Cost is estimated
+8. Generation is stored
+9. Evaluations run
+10. Scores are written
+11. Dashboard reads traces and analytics
 
-- simple enough to finish
-- clean enough to defend architecturally
-- practical enough to demonstrate LLM engineering maturity
+## Evaluation lifecycle
 
-## Production Upgrade Path
+### Semantic similarity
 
-- Replace SQLite with PostgreSQL.
-- Add Alembic migrations.
-- Add auth and multi-project scoping.
-- Add background analytics jobs.
-- Add prompt tags, trace ids, sessions, and costs.
-- Export metrics to Prometheus or OpenTelemetry.
+Uses `sentence-transformers` when available and a fallback heuristic otherwise.
+
+### Classifier scoring
+
+Uses Hugging Face zero-shot classification when available.
+
+### LLM-as-judge
+
+Runs as a background task so the main response stays fast while deeper evaluation still lands in the score table.
+
+## Prompt management lifecycle
+
+1. Create prompt family
+2. Add versions
+3. Promote one version to `production`
+4. Link generations back to `prompt_template_name` and `prompt_template_version`
+5. Compare prompt versions using score and latency analytics
 

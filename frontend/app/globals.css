@@ -26,8 +26,25 @@ body {
   font-family: Georgia, "Times New Roman", serif;
 }
 
-button {
+input,
+select,
+textarea {
+  background: var(--surface-strong);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  color: var(--text);
   font: inherit;
+  padding: 12px 14px;
+  width: 100%;
+}
+
+button {
+  background: var(--accent);
+  border: 0;
+  border-radius: 999px;
+  color: white;
+  font: inherit;
+  padding: 10px 16px;
 }
 
 .pageShell {
@@ -99,6 +116,7 @@ button {
 
 .panel {
   overflow: hidden;
+  margin-bottom: 24px;
 }
 
 .panelHeader {
@@ -143,6 +161,89 @@ td {
   line-height: 1.6;
 }
 
+.selectedRow {
+  background: rgba(209, 107, 54, 0.08);
+}
+
+.traceLink {
+  color: var(--accent-deep);
+  text-decoration: none;
+}
+
+.subtle {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.detailBody {
+  padding: 24px;
+}
+
+.detailGrid,
+.managerGrid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.managerGrid.compact {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.detailCard {
+  background: rgba(255, 255, 255, 0.45);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 18px;
+}
+
+.detailCard h3 {
+  margin-top: 0;
+}
+
+.detailCard pre {
+  margin: 0;
+  overflow-x: auto;
+  white-space: pre-wrap;
+}
+
+.detailCard.wide {
+  grid-column: span 2;
+}
+
+.spanBlock,
+.generationBlock,
+.scoreList {
+  display: grid;
+  gap: 12px;
+}
+
+.generationBlock {
+  border-left: 3px solid rgba(209, 107, 54, 0.4);
+  padding-left: 14px;
+}
+
+.scoreRow {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.analyticsGrid {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.inlineForm {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+}
+
+.inlineForm input {
+  min-width: 180px;
+}
+
 .feedbackActions {
   display: flex;
   gap: 8px;
@@ -152,6 +253,7 @@ td {
   background: var(--surface-strong);
   border: 1px solid var(--border);
   border-radius: 999px;
+  color: var(--text);
   cursor: pointer;
   padding: 8px 12px;
   transition: transform 150ms ease, background 150ms ease, border-color 150ms ease;
@@ -194,5 +296,13 @@ td {
   .heroCopy {
     font-size: 0.98rem;
   }
-}
 
+  .detailCard.wide {
+    grid-column: span 1;
+  }
+
+  .inlineForm {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}
