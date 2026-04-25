@@ -1,4 +1,4 @@
-# Mini Langfuse Reimplementation for NLP / Transformers Interviews
+# Mini Langfuse Reimplementation 
 
 This project is a focused reimplementation of Langfuse's core ideas:
 
